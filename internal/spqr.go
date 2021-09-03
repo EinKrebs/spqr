@@ -11,28 +11,24 @@ import (
 )
 
 type Spqr struct {
-	//TODO add some fiels from spqrconfig
-	Cfg *config.SpqrConfig
-
 	Router  *Router
 	Qrouter *qrouter.QrouterImpl
-
 	SPIexecuter *Executer
 }
 
 const defaultProto = "tcp"
 
-func NewSpqr(config *config.SpqrConfig) (*Spqr, error) {
-
+func NewSpqr(initialSqlPath string) (*Spqr, error) {
 	qrouter := qrouter.NewR()
-
-	router, err := NewRouter(config.RouterCfg, qrouter)
+	router, err := NewRouter(qrouter)
 	if err != nil {
 		return nil, errors.Wrap(err, "NewRouter")
 	}
-	tracelog.InfoLogger.Printf("%v", config.RouterCfg.ShardMapping)
 
-	for name, shard := range config.RouterCfg.ShardMapping {
+	shardMapping := config.GetRoutingConfig().ShardMapping
+	tracelog.InfoLogger.Printf("%v", shardMapping)
+
+	for name, shard := range shardMapping {
 		if shard.TLSCfg.ReqSSL {
 			cert, err := tls.LoadX509KeyPair(shard.TLSCfg.CertFile, shard.TLSCfg.KeyFile)
 			if err != nil {
@@ -52,12 +48,11 @@ func NewSpqr(config *config.SpqrConfig) (*Spqr, error) {
 		tracelog.InfoLogger.FatalOnError(qrouter.AddShard(name, &shard))
 	}
 
-	executer := NewExecuter(config.ExecuterCfg)
+	executer := NewExecuter(initialSqlPath)
 
 	executer.SPIexec(router.ConsoleDB, NewFakeClient())
 
 	return &Spqr{
-		Cfg:         config,
 		Router:      router,
 		Qrouter:     qrouter,
 		SPIexecuter: executer,

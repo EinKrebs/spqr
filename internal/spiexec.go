@@ -93,18 +93,17 @@ func (f FakeClient) Receive() (pgproto3.FrontendMessage, error) {
 var _ Client = &FakeClient{}
 
 type Executer struct {
-	cfg config.ExecuterCfg
+	initSqlPath string
 }
 
-func NewExecuter(cfg config.ExecuterCfg) *Executer {
+func NewExecuter(initSqlPath string) *Executer {
 	return &Executer{
-		cfg: cfg,
+		initSqlPath,
 	}
 }
 
 func (e *Executer) ReadCmds() []string {
-
-	f, err := os.Open(e.cfg.InitSQLPath)
+	f, err := os.Open(e.initSqlPath)
 	if err != nil {
 		log.Fatal(err)
 	}

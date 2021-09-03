@@ -14,7 +14,6 @@ import (
 )
 
 type Router struct {
-	Cfg       config.RouterConfig
 	ConsoleDB Console
 	mu        sync.Mutex
 	routePool map[routeKey][]*Route
@@ -30,11 +29,10 @@ func (r *Router) ServeConsole(netconn net.Conn) error {
 	return r.ConsoleDB.Serve(netconn)
 }
 
-func NewRouter(cfg config.RouterConfig, qrouter qrouter.Qrouter) (*Router, error) {
-
+func NewRouter(qrouter qrouter.Qrouter) (*Router, error) {
 	frs := make(map[routeKey]*config.FRRule)
 
-	for _, e := range cfg.FrontendRules {
+	for _, e := range config.GetRoutingConfig().FrontendRules {
 		frs[routeKey{
 			usr: e.RK.Usr,
 			db:  e.RK.DB,
@@ -42,7 +40,7 @@ func NewRouter(cfg config.RouterConfig, qrouter qrouter.Qrouter) (*Router, error
 	}
 	bes := make(map[routeKey]*config.BERule)
 
-	for _, e := range cfg.BackendRules {
+	for _, e := range config.GetRoutingConfig().BackendRules {
 		bes[routeKey{
 			usr: e.RK.Usr,
 			db:  e.RK.DB,
@@ -50,17 +48,16 @@ func NewRouter(cfg config.RouterConfig, qrouter qrouter.Qrouter) (*Router, error
 	}
 
 	router := &Router{
-		Cfg:           cfg,
 		mu:            sync.Mutex{},
 		routePool:     map[routeKey][]*Route{},
 		frontendRules: frs,
 		backendRules:  bes,
 		lg:            log.New(os.Stdout, "router", 0),
 	}
-
-	if cfg.TLSCfg.ReqSSL {
-		cert, err := tls.LoadX509KeyPair(cfg.TLSCfg.CertFile, cfg.TLSCfg.KeyFile)
-		router.lg.Printf("loading tls cert file %s, key file %s", cfg.TLSCfg.CertFile, cfg.TLSCfg.KeyFile)
+    tlsConfig := config.GetRoutingConfig().TLSCfg
+	if tlsConfig.ReqSSL {
+		cert, err := tls.LoadX509KeyPair(tlsConfig.CertFile, tlsConfig.KeyFile)
+		router.lg.Printf("loading tls cert file %s, key file %s", tlsConfig.CertFile, tlsConfig.KeyFile)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to load frontend tls conf")
 		}
@@ -75,10 +72,8 @@ func NewRouter(cfg config.RouterConfig, qrouter qrouter.Qrouter) (*Router, error
 }
 
 func (r *Router) PreRoute(conn net.Conn) (Client, error) {
-
 	cl := NewClient(conn)
-
-	if err := cl.Init(r.cfg, r.Cfg.TLSCfg.ReqSSL); err != nil {
+	if err := cl.Init(r.cfg, config.GetRoutingConfig().TLSCfg.ReqSSL); err != nil {
 		return nil, err
 	}
 
@@ -143,7 +138,7 @@ func (r *Router) PreRoute(conn net.Conn) (Client, error) {
 func (r *Router) ListShards() []string {
 	var ret []string
 
-	for _, sh := range r.Cfg.ShardMapping {
+	for _, sh := range config.GetRoutingConfig().ShardMapping {
 		ret = append(ret, sh.ConnAddr)
 	}
 

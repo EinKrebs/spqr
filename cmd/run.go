@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"os"
 	"sync"
 
 	"github.com/pg-sharding/spqr/app"
@@ -10,25 +9,27 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/wal-g/tracelog"
-	"gopkg.in/yaml.v2"
 )
 
 var (
 	configPath string
-	spqrConfig config.SpqrConfig
+	initSqlPath string
 )
 
 func init() {
-	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to config file")
+	rootCmd.PersistentFlags().StringVarP(&initSqlPath, "sql", "s", "", "path to initial SQL file")
 	rootCmd.AddCommand(runCmd)
 }
 
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "run SPQR",
+	Short: "Entrypoint command",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		spqr, err := internal.NewSpqr(&spqrConfig)
+		if err := config.InitConfig(configPath); err != nil {
+			return err
+		}
+		spqr, err := internal.NewSpqr(initSqlPath)
 		if err != nil {
 			return errors.Wrap(err, "SPQR creation failed")
 		}
@@ -64,20 +65,3 @@ var runCmd = &cobra.Command{
 	},
 }
 
-// initConfig reads in config
-func initConfig() {
-	// anyway viper is a dependency for cobra so why not
-	if configPath != "" {
-		tracelog.InfoLogger.Println("Parsing config from", configPath)
-		file, err := os.Open(configPath)
-		tracelog.ErrorLogger.FatalOnError(err)
-		defer file.Close()
-
-		tracelog.InfoLogger.Println("Decoding config")
-		decoder := yaml.NewDecoder(file)
-		err = decoder.Decode(&spqrConfig)
-		tracelog.ErrorLogger.FatalOnError(err)
-	} else {
-		tracelog.ErrorLogger.Fatal("Please pass config path with --config")
-	}
-}

@@ -1,50 +1,39 @@
-
-addr: '[spqr_router_1_1]:6432'
-adm_addr: '[spqr_router_1_1]:7432'
-proto: 'tcp'
-http_conf:
-        addr: 'spqr_router_1_1:7000'
-
-executer:
-        init_sql_path: "/router/docker/router/init.sql"
-
-router:
-        tls:
-                key_file: '/etc/odyssey/ssl/server.key'
-                cert_file: '/etc/odyssey/ssl/server.crt' 
-                require_ssl: false 
-        frontend_rules:
-                - route_key_cfg:
-                        usr: user1
-                        db: db1
-                  pooling_mode: SESSION
-                  auth_rule:
-                          auth_method: 'ok'
-        proto: 'tcp6'
-        shard_mapping:
-                sh1: 
-                        tls:
-                                key_file: '/etc/odyssey/ssl/server.key'
-                                require_ssl: false 
-                                cert_file: '/etc/odyssey/ssl/server.crt' 
-                        conn_addr: "192.168.233.02:6432"
-                        conn_db: "db1"
-                        conn_usr: "user1"
-                        passwd: 12345678
-                sh2: 
-                        tls:
-                                key_file: '/etc/odyssey/ssl/server.key'
-                                require_ssl: false
-                                cert_file: '/etc/odyssey/ssl/server.crt' 
-                        conn_addr: "192.168.233.03:6432"
-                        conn_db: "db1"
-                        conn_usr: "user1"
-                        passwd: 12345678
-
-        backend_rules:
-                - route_key_cfg:
-                        usr: user1
-                        db: db1
-                  pool_discard: true
-                  pool_rollback: true
-
+proto: tcp6
+tls:
+  key_file: /etc/odyssey/ssl/server.key
+  cert_file: /etc/odyssey/ssl/server.crt
+  require_ssl: false
+shard_mapping:
+  sh1:
+    tls:
+      key_file: /etc/odyssey/ssl/server.key
+      require_ssl: false
+      cert_file: /etc/odyssey/ssl/server.crt
+    conn_addr: '192.168.233.02:6432'
+    conn_db: db1
+    conn_usr: user1
+    passwd: 12345678
+  sh2:
+    tls:
+      key_file: /etc/odyssey/ssl/server.key
+      require_ssl: false
+      cert_file: /etc/odyssey/ssl/server.crt
+    conn_addr: '192.168.233.03:6432'
+    conn_db: db1
+    conn_usr: user1
+    passwd: 12345678
+frontend_rules:
+  - rule:
+    route_key_cfg:
+      usr: user1
+      db: db1
+    pooling_mode: SESSION
+    auth_rule:
+      auth_method: ok
+backend_rules:
+  - rule:
+    route_key_cfg:
+      usr: user1
+      db: db1
+    pool_discard: true
+    pool_rollback: true

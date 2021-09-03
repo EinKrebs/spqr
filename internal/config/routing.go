@@ -4,11 +4,8 @@ type RouteKeyCfg struct {
 	Usr string `json:"usr" yaml:"usr" toml:"usr"`
 	DB  string `json:"db" yaml:"db" toml:"db"`
 }
-type ExecuterCfg struct {
-	InitSQLPath string `json:"init_sql_path" yaml:"init_sql_path" toml:"init_sql_path"`
-}
 
-type RouterConfig struct {
+type RoutingConfig struct {
 	BackendRules  []*BERule `json:"backend_rules" toml:"backend_rules" yaml:"backend_rules"`
 	FrontendRules []*FRRule `json:"frontend_rules" toml:"frontend_rules" yaml:"frontend_rules"`
 

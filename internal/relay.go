@@ -13,19 +13,16 @@ type RelayState struct {
 }
 
 func (rst *RelayState) reroute(rt qrouter.Qrouter, cl Client, cmngr ConnManager, q *pgproto3.Query) error {
-
 	shardNames := rt.Route(q.String)
-
-	var shards []Shard
-
-	for _, name := range shardNames {
-		shards = append(shards, NewShard(name, rt.ShardCfg(name)))
-	}
-
 	if shardNames == nil {
 		return cmngr.UnRouteWithError(cl, nil, "failed to match shard")
 	} else {
 		tracelog.InfoLogger.Printf("parsed shard name %s", shardNames)
+	}
+
+	var shards []Shard
+	for _, name := range shardNames {
+		shards = append(shards, NewShard(name, rt.ShardCfg(name)))
 	}
 
 	if rst.ActiveShards != nil {
