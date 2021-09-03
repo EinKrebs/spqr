@@ -12,12 +12,10 @@ import (
 )
 
 var (
-	configPath string
 	initSqlPath string
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to config file")
 	rootCmd.PersistentFlags().StringVarP(&initSqlPath, "sql", "s", "", "path to initial SQL file")
 	rootCmd.AddCommand(runCmd)
 }
@@ -26,7 +24,7 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Entrypoint command",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := config.InitConfig(configPath); err != nil {
+		if err := config.InitConfig(); err != nil {
 			return err
 		}
 		spqr, err := internal.NewSpqr(initSqlPath)

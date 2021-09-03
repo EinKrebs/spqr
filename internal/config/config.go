@@ -4,18 +4,19 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
 )
 
 type AppConfig struct {
-	LogLevel string `default:"DEBUG"`// TODO usage
+	LogLevel string `default:"DEBUG"` // TODO usage
 	Addr     string `required:"true"`
 	ADMAddr  string `required:"true"`
 	HttpAddr string `required:"true"`
 	PROTO    string `required:"true"`
-	SpqrData string `default:"docker/router/cfg.yaml"`
+	Data     string `required:"true"`
 }
 
 var (
@@ -23,11 +24,11 @@ var (
 	routingConfig RoutingConfig
 )
 
-func InitConfig(filePath string) error {
+func InitConfig() error {
 	if err := initAppConfig(); err != nil {
 		return err
 	}
-	if err := initRoutingConfig(filePath); err != nil {
+	if err := initRoutingConfig(); err != nil {
 		return err
 	}
 	return nil
@@ -46,7 +47,7 @@ func initAppConfig() error {
 	if err != nil {
 		return err
 	}
-	
+
 	configBytes, err := json.MarshalIndent(appConfig, "", "  ")
 	if err != nil {
 		return err
@@ -55,7 +56,8 @@ func initAppConfig() error {
 	return nil
 }
 
-func initRoutingConfig(configPath string) error {
+func initRoutingConfig() error {
+	configPath := filepath.Join(appConfig.Data, "routing.yaml")
 	file, err := os.Open(configPath)
 	if err != nil {
 		return err

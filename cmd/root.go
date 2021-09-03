@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/wal-g/tracelog"
 )
@@ -18,5 +20,6 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		tracelog.ErrorLogger.Fatal(err)
+		os.Exit(1)
 	}
 }

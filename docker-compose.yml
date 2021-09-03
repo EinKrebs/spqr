@@ -31,6 +31,7 @@ services:
             - SPQR_ADMADDR=[spqr_router_1_1]:7432
             - SPQR_PROTO=tcp
             - SPQR_HTTPADDR=spqr_router_1_1:7000
+            - SPQR_DATA=/router/docker/router/data
         build:
             dockerfile: ./docker/router/Dockerfile
             context: .
