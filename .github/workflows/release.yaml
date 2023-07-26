@@ -43,8 +43,8 @@ jobs:
           add: debian/changelog
           message: Modified debian/changelog
           default_author: github_actions
-          new_branch: master
-          push: --set-upstream origin master
+          new_branch: ${{ github.event.pull_request.head.ref }}
+          push: --set-upstream origin ${{ github.event.pull_request.head.ref }}
 
       - name: build package
         run: |
