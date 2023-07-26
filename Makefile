@@ -107,4 +107,7 @@ package:
 	sed -i 's/SPQR_VERSION/$(version)/g' debian/changelog
 	dpkg-buildpackage -us -uc
 
+generate-changelog:
+	./debian/generate-changelog.sh
+
 .PHONY: build gen
