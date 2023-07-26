@@ -31,6 +31,17 @@ jobs:
       - name: Set env
         run: echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
+      - name: Generate debian/changelog
+        run: make generate-changelog
+
+      - name: Add new debian/changelog to GitHub
+        uses: EndBug/add-and-commit@v9
+        with: 
+          add: debian/changelog
+          message: Modified debian/changelog
+          default_author: github_actions
+          push: true
+
       - name: build package
         run: |
           make package
