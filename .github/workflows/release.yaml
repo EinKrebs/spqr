@@ -34,15 +34,6 @@ jobs:
       - name: build package
         run: |
           make package
-          # gh release edit ${TAG} $(echo ../* | tr ' ' '\n' | grep -v '^../spqr$' | tr '\n' ' ')
+          gh release upload ${TAG} $(echo ../* | tr ' ' '\n' | grep -v '^../spqr$' | tr '\n' ' ')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload files to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: $(echo ../* | tr ' ' '\n' | grep -v '^../spqr$' | tr '\n' ' ')
-          asset_name: Package files
-          tag: ${TAG}
-          overwrite: true
