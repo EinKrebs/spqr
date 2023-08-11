@@ -8,8 +8,8 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    steps:
 
+    steps:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
@@ -27,7 +27,7 @@ jobs:
               dep ensure
           fi
           sudo apt update && sudo apt install -y debhelper
-      
+
       - name: Set env
         run: echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
@@ -37,12 +37,12 @@ jobs:
           # gh release edit ${TAG} $(echo ../* | tr ' ' '\n' | grep -v '^../spqr$' | tr '\n' ' ')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Upload files to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: $(echo ../* | tr ' ' '\n' | grep -v '^../spqr$' | tr '\n' ' ')
-        asset_name: Package files
-        tag: ${TAG}
-        overwrite: true
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: $(echo ../* | tr ' ' '\n' | grep -v '^../spqr$' | tr '\n' ' ')
+          asset_name: Package files
+          tag: ${TAG}
+          overwrite: true
